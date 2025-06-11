@@ -11,11 +11,16 @@ import UniformTypeIdentifiers
 struct ContentView: View {
     @AppStorage("AudioFile") var audioFile: URL?
     @State private var isPickerPresented = false
+    @State private var longPressed = false
     var player: AudioPlayer = AudioPlayer()
     
     var body: some View {
         VStack {
             Button() {
+                if longPressed {
+                    longPressed = false
+                    return
+                }
                 if audioFile == nil {
                     isPickerPresented.toggle()
                     // View to add from File app
@@ -29,6 +34,7 @@ struct ContentView: View {
             .simultaneousGesture(
                 LongPressGesture(minimumDuration: 0.5).onEnded() { _ in
                     audioFile = nil
+                    longPressed = true
                 }
             )
             .sheet(isPresented: $isPickerPresented) {

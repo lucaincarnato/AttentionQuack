@@ -26,6 +26,7 @@ class AudioPlayer: ObservableObject {
         // Play audio
         do {
             self.player = try AVAudioPlayer(contentsOf: url)
+            self.stopSound()
             self.player?.prepareToPlay()
             player?.play()
         } catch {
@@ -50,6 +51,7 @@ class AudioPlayer: ObservableObject {
             
             // Initialize and play audio
             self.player = try AVAudioPlayer(contentsOf: fileURL)
+            self.stopSound()
             self.player?.prepareToPlay()
             self.player?.play()
         } catch {
