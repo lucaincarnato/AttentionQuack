@@ -13,6 +13,8 @@ struct ContentView: View {
     @AppStorage("AudioFile") var audioFile: URL?
     @State private var isPickerPresented = false
     @State private var longPressed = false
+    @State private var successFeedback: Bool = false
+    @State private var errorFeedback: Bool = false
     var player: AudioPlayer = AudioPlayer()
     
     private var width = UIScreen.main.bounds.width
@@ -29,7 +31,7 @@ struct ContentView: View {
                     .font(.title)
                     .bold()
                     .foregroundStyle(.accent)
-                    .offset(x: 0, y: 200)
+                    .offset(x: 0, y: -300)
             }
             VStack {
                 Button() {
@@ -41,17 +43,21 @@ struct ContentView: View {
                         isPickerPresented.toggle()
                         // View to add from File app
                     } else {
+                        successFeedback.toggle()
                         player.playSound(from: audioFile!)
                     }
                 } label: {
                     Image(audioFile == nil ? "addButton" : "button")
                         .frame(width: 150, height: 150)
                 }
+                .sensoryFeedback(.success, trigger: successFeedback)
+                .sensoryFeedback(.error, trigger: errorFeedback)
                 .simultaneousGesture(
                     LongPressGesture(minimumDuration: 0.5, maximumDistance: 3).onEnded() { _ in
                         audioFile = nil
                         longPressed = true
                         firstLaunch = false
+                        errorFeedback.toggle()
                         player.stopSound()
                     }
                 )
