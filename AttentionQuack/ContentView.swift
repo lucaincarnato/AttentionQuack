@@ -9,41 +9,69 @@ import SwiftUI
 import UniformTypeIdentifiers
 
 struct ContentView: View {
+    @AppStorage("FirstLaunch") var firstLaunch: Bool = true
     @AppStorage("AudioFile") var audioFile: URL?
     @State private var isPickerPresented = false
     @State private var longPressed = false
     var player: AudioPlayer = AudioPlayer()
     
+    private var width = UIScreen.main.bounds.width
+    private var height = UIScreen.main.bounds.height
+    
     var body: some View {
-        VStack {
-            Button() {
-                if longPressed {
-                    longPressed = false
-                    return
-                }
-                if audioFile == nil {
-                    isPickerPresented.toggle()
-                    // View to add from File app
-                } else {
-                    player.playSound(from: audioFile!)
-                }
-            } label: {
-                Image(systemName: audioFile == nil ? "plus" : "play.fill")
-                    .frame(width: 150, height: 150)
+        ZStack{
+            if (firstLaunch && audioFile != nil){
+                Image("OnboardingImage")
+                    .resizable()
+                    .scaledToFill()
+                    .ignoresSafeArea()
+                Text("Hold it")
+                    .font(.title)
+                    .bold()
+                    .foregroundStyle(.accent)
+                    .offset(x: 0, y: 200)
             }
-            .simultaneousGesture(
-                LongPressGesture(minimumDuration: 0.5).onEnded() { _ in
-                    audioFile = nil
-                    longPressed = true
-                }
-            )
-            .sheet(isPresented: $isPickerPresented) {
-                        AudioFilePicker { url in
-                            audioFile = url
-                        }
+            VStack {
+                Button() {
+                    if longPressed {
+                        longPressed = false
+                        return
                     }
+                    if audioFile == nil {
+                        isPickerPresented.toggle()
+                        // View to add from File app
+                    } else {
+                        player.playSound(from: audioFile!)
+                    }
+                } label: {
+                    Image(audioFile == nil ? "addButton" : "button")
+                        .frame(width: 150, height: 150)
+                }
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 0.5, maximumDistance: 3).onEnded() { _ in
+                        audioFile = nil
+                        longPressed = true
+                        firstLaunch = false
+                        player.stopSound()
+                    }
+                )
+                .simultaneousGesture(
+                    LongPressGesture(minimumDuration: 3.1).onEnded() { _ in
+                        audioFile = nil
+                        longPressed = true
+                        firstLaunch = false
+                        player.stopSound()
+                        player.playSound("quack")
+                    }
+                )
+                .sheet(isPresented: $isPickerPresented) {
+                    AudioFilePicker { url in
+                        audioFile = url
+                    }
+                }
+            }
+            .padding()
         }
-        .padding()
     }
 }
 
